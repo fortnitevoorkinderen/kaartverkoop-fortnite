@@ -1,4 +1,4 @@
- require('dotenv').config();
+require('dotenv').config();
 const express = require('express');
 const mollieClient = require('@mollie/api-client').createMollieClient;
 const nodemailer = require('nodemailer');
@@ -7,7 +7,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = process.env.PORT || 3000;
+const PORT = process.env.PORT || 10000; // ✅ Render gebruikt PORT automatisch
 
 app.use(express.static('public'));
 app.use(cors());
@@ -31,7 +31,7 @@ app.post('/start-payment', async (req, res) => {
       },
       description: `Real-Life Fortnite kaartje(s): ${aantal}x`,
       redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`, // ✅ LIVE
-      webhookUrl: 'https://fortnitevoorkinderen.com/webhook',        // ✅ LIVE
+      webhookUrl: 'https://fortnitevoorkinderen.com/webhook',       // ✅ LIVE
       metadata: {
         aantal,
         telefoon,
@@ -111,7 +111,6 @@ Factuurnummer: ${factuurNummer}`
       await transporter.sendMail(mailToOrganizer);
       await transporter.sendMail(mailToCustomer);
       console.log('📧 Bevestigingsmails verzonden');
-
     } else {
       console.log(`ℹ️ Betaling niet voltooid: status = ${payment.status}`);
     }
@@ -127,5 +126,6 @@ Factuurnummer: ${factuurNummer}`
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op poort ${PORT}`);
 });
+
 
 
