@@ -7,7 +7,7 @@ const path = require('path');
 const bodyParser = require('body-parser');
 
 const app = express();
-const PORT = process.env.PORT || 10000; // ✅ Render gebruikt PORT automatisch
+const PORT = process.env.PORT || 10000;
 
 app.use(express.static('public'));
 app.use(cors());
@@ -30,8 +30,8 @@ app.post('/start-payment', async (req, res) => {
         value: totaalBedrag
       },
       description: `Real-Life Fortnite kaartje(s): ${aantal}x`,
-      redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`, // ✅ LIVE
-      webhookUrl: 'https://fortnitevoorkinderen.com/webhook',       // ✅ LIVE
+      redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`,  // Laat deze op .com als je frontend daar draait
+      webhookUrl: 'https://fortnitevoorkinderen.onrender.com/webhook', // Belangrijk: webhook moet naar je server
       metadata: {
         aantal,
         telefoon,
@@ -73,15 +73,7 @@ app.post('/webhook', async (req, res) => {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
         subject: 'Nieuwe Kaartverkoop – Real-Life Fortnite',
-        text: `Nieuwe aanmelding ontvangen:
-
-Aantal kaartjes: ${aantal}
-Totaalbedrag: €${totaalBedrag}
-Postcode: ${postcode}
-Leeftijden: ${leeftijden}
-Telefoonnummer: ${telefoon}
-E-mailadres klant: ${email}
-Factuurnummer: ${factuurNummer}`
+        text: `Nieuwe aanmelding ontvangen:\n\nAantal kaartjes: ${aantal}\nTotaalbedrag: €${totaalBedrag}\nPostcode: ${postcode}\nLeeftijden: ${leeftijden}\nTelefoonnummer: ${telefoon}\nE-mailadres klant: ${email}\nFactuurnummer: ${factuurNummer}`
       };
 
       const mailToCustomer = {
@@ -126,6 +118,5 @@ Factuurnummer: ${factuurNummer}`
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op poort ${PORT}`);
 });
-
 
 
