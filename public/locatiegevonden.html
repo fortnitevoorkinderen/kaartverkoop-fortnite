@@ -1,0 +1,149 @@
+<!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Locatie Gevonden</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('background.locatie.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      color: white;
+      height: 100vh;
+    }
+
+    .container {
+      max-width: 600px;
+      margin: 60px auto;
+      padding: 30px;
+      background-color: rgba(0, 0, 0, 0.5);
+      border-radius: 20px;
+      text-align: center;
+    }
+
+    h1 {
+      color: #00ff66;
+      font-size: 40px;
+      margin-bottom: 10px;
+      text-shadow: 0 0 10px #00ff66;
+    }
+
+    .subtext {
+      font-size: 20px;
+      color: #ffffff;
+      margin-bottom: 30px;
+    }
+
+    .leeftijd input {
+      margin-top: 10px;
+      padding: 10px;
+      width: 200px;
+      font-size: 18px;
+      border: none;
+      border-radius: 6px;
+      text-align: center;
+    }
+
+    .button-add {
+      margin-top: 15px;
+      background-color: transparent;
+      border: 2px solid #00aaff;
+      color: white;
+      font-weight: bold;
+      padding: 10px 20px;
+      font-size: 16px;
+      border-radius: 6px;
+      cursor: pointer;
+      box-shadow: 0 0 12px #00aaff;
+    }
+
+    .button-add:hover {
+      background-color: #00aaff;
+      color: black;
+    }
+
+    .knop {
+      display: inline-block;
+      margin-top: 30px;
+      padding: 12px 30px;
+      background-color: transparent;
+      border: 2px solid #00aaff;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      text-decoration: none;
+      border-radius: 6px;
+      box-shadow: 0 0 12px #00aaff;
+      transition: all 0.3s ease;
+      cursor: pointer;
+    }
+
+    .knop:hover {
+      background-color: #00aaff;
+      color: black;
+    }
+
+    .error {
+      color: red;
+      margin-top: 10px;
+      font-weight: bold;
+    }
+  </style>
+</head>
+<body>
+
+  <div class="container">
+    <h1>Locatie gevonden!</h1>
+    <div class="subtext">Locatie in straal van 2 km.</div>
+
+    <div class="leeftijd">
+      <p>Hoe oud is uw kind?</p>
+      <div id="leeftijdVelden">
+        <input type="number" name="leeftijd1" min="0" max="18" placeholder="Bijv. 6">
+      </div>
+      <button type="button" class="button-add" onclick="voegKindToe()">Nog een kind toevoegen</button>
+    </div>
+
+    <div id="foutmelding" class="error"></div>
+
+    <button class="knop" onclick="checkLeeftijden()">VOLGENDE</button>
+  </div>
+
+  <script>
+    let teller = 1;
+
+    function voegKindToe() {
+      teller++;
+      const nieuwVeld = document.createElement("input");
+      nieuwVeld.type = "number";
+      nieuwVeld.name = "leeftijd" + teller;
+      nieuwVeld.min = 0;
+      nieuwVeld.max = 18;
+      nieuwVeld.placeholder = "Leeftijd kind " + teller;
+      document.getElementById("leeftijdVelden").appendChild(nieuwVeld);
+    }
+
+    function checkLeeftijden() {
+      const velden = document.querySelectorAll('#leeftijdVelden input');
+      let leeftijden = [];
+
+      velden.forEach(veld => {
+        if (veld.value !== '' && veld.value >= 0 && veld.value <= 18) {
+          leeftijden.push(veld.value);
+        }
+      });
+
+      if (leeftijden.length > 0) {
+        localStorage.setItem("leeftijden", JSON.stringify(leeftijden));
+        window.location.href = "kaartverkoop.html";
+      } else {
+        document.getElementById("foutmelding").textContent = "Vul minimaal één geldige leeftijd in.";
+      }
+    }
+  </script>
+
+</body>
+</html>
+

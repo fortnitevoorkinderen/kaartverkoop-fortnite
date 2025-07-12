@@ -1,0 +1,93 @@
+ <!DOCTYPE html>
+<html lang="nl">
+<head>
+  <meta charset="UTF-8">
+  <title>Voer je postcode in - Rotterdam</title>
+  <style>
+    body {
+      margin: 0;
+      padding: 0;
+      background: url('postcodee.png') no-repeat center center fixed;
+      background-size: cover;
+      font-family: Arial, sans-serif;
+      color: white;
+      height: 100vh;
+    }
+
+    .container {
+      width: 400px;
+      margin: 0 auto;
+      margin-top: 80px;
+      padding: 30px;
+      border: 3px solid #ff00ff;
+      border-radius: 10px;
+      background-color: rgba(0, 0, 0, 0.4);
+      text-align: center;
+    }
+
+    .container h1 {
+      color: #00ffff;
+      font-size: 28px;
+      margin-bottom: 40px;
+      text-shadow: 0 0 10px #00ffff;
+    }
+
+    label {
+      color: yellow;
+      font-size: 20px;
+    }
+
+    input[type="text"] {
+      width: 90%;
+      padding: 10px;
+      margin-top: 10px;
+      margin-bottom: 30px;
+      border: 2px solid #ff00ff;
+      border-radius: 5px;
+      background: transparent;
+      color: white;
+      font-size: 18px;
+      outline: none;
+    }
+
+    .volgende {
+      display: inline-block;
+      padding: 12px 30px;
+      background-color: transparent;
+      border: 2px solid #00aaff;
+      color: white;
+      font-weight: bold;
+      font-size: 18px;
+      text-decoration: none;
+      border-radius: 6px;
+      transition: all 0.3s ease;
+      box-shadow: 0 0 10px #00aaff;
+      cursor: pointer;
+    }
+
+    .volgende:hover {
+      background-color: #00aaff;
+      color: black;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>VOER JE POSTCODE IN</h1>
+    <form onsubmit="opslaanEnGaVerder(event)">
+      <label for="postcode">Postcode:</label><br>
+      <input type="text" id="postcode" name="postcode" placeholder="1234AB" required><br>
+      <button type="submit" class="volgende">VOLGENDE</button>
+    </form>
+  </div>
+
+  <script>
+    function opslaanEnGaVerder(event) {
+      event.preventDefault();
+      const postcode = document.getElementById("postcode").value.trim();
+      localStorage.setItem("postcode", postcode);
+      window.location.href = "locatiegevonden.html";
+    }
+  </script>
+</body>
+</html>
