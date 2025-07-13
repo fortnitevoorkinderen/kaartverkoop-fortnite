@@ -104,53 +104,6 @@
 
   <script>
     document.addEventListener("DOMContentLoaded", () => {
-      const opgeslagenPostcode = localStorage.getItem("postcode");
-      if (opgeslagenPostcode) {
-        document.getElementById("postcode").value = opgeslagenPostcode;
-      }
-    });
-
-    document.getElementById("verkoopForm").addEventListener("submit", async function (e) {
-      e.preventDefault();
-
-      const aantal = document.getElementById("aantal").value;
-      const telefoon = document.getElementById("telefoon").value;
-      const email = document.getElementById("email").value;
-      const leeftijden = localStorage.getItem("leeftijden");
-      const postcode = document.getElementById("postcode").value;
-
-      if (!aantal || !telefoon || !email || !postcode) {
-        document.getElementById("foutmelding").textContent = "Vul alle velden in.";
-        return;
-      }
-
-      try {
-        const response = await fetch("https://fortnitevoorkinderen.onrender.com/start-payment", {
-          method: "POST",
-          headers: { "Content-Type": "application/json" },
-          body: JSON.stringify({
-            aantal,
-            telefoon,
-            email,
-            leeftijden: leeftijden ? JSON.parse(leeftijden) : [],
-            postcode
-          })
-        });
-
-        const data = await response.json();
-        if (data.url) {
-          window.location.href = data.url;
-        } else {
-          document.getElementById("foutmelding").textContent = "Er ging iets mis met de betaling.";
-        }
-      } catch (error) {
-        console.error("Fout bij betaling:", error);
-        document.getElementById("foutmelding").textContent = "Verbindingsfout. Probeer opnieuw.";
-      }
-    });
-  </script>
-
-</body>
-</html>
+      const opgeslagenP
 
 
