@@ -9,12 +9,18 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
+// ✅ Zet apiKey eerst apart
+const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
+if (!MOLLIE_API_KEY) {
+  throw new Error("❌ MOLLIE_API_KEY ontbreekt! Voeg deze toe in je Render Environment Variables.");
+}
+
+const mollie = mollieClient({ apiKey: MOLLIE_API_KEY });
+
 app.use(express.static('public'));
 app.use(cors());
 app.use(bodyParser.json());
 app.use('/webhook', express.urlencoded({ extended: true }));
-
-const mollie = mollieClient({ apiKey: process.env.MOLLIE_API_KEY });
 
 // ✅ STAP 1: Betaling aanmaken
 app.post('/start-payment', async (req, res) => {
@@ -30,8 +36,8 @@ app.post('/start-payment', async (req, res) => {
         value: totaalBedrag
       },
       description: `Real-Life Fortnite kaartje(s): ${aantal}x`,
-      redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`,  // Laat deze op .com als je frontend daar draait
-      webhookUrl: 'https://fortnitevoorkinderen.onrender.com/webhook', // Belangrijk: webhook moet naar je server
+      redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`,
+      webhookUrl: 'https://fortnitevoorkinderen.onrender.com/webhook',
       metadata: {
         aantal,
         telefoon,
