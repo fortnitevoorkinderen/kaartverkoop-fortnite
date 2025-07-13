@@ -3,7 +3,6 @@
 <head>
   <meta charset="UTF-8">
   <title>Kaartverkoop</title>
-  <link rel="stylesheet" href="style.css">
   <style>
     body {
       margin: 0;
@@ -25,7 +24,7 @@
       border-radius: 10px;
       text-align: center;
       box-shadow: 0 0 15px #ff00ff;
-      max-width: 300px;
+      max-width: 320px;
       width: 90%;
     }
 
@@ -101,21 +100,16 @@
 
   <script>
     document.getElementById("verzendBtn").addEventListener("click", async function () {
-      const aantal = document.getElementById("aantal").value.trim();
-      const telefoon = document.getElementById("telefoon").value.trim();
-      const email = document.getElementById("email").value.trim();
+      const aantal = document.getElementById("aantal").value;
+      const telefoon = document.getElementById("telefoon").value;
+      const email = document.getElementById("email").value;
       const postcode = localStorage.getItem("postcode");
 
       let leeftijden = [];
       try {
         const opgeslagen = localStorage.getItem("leeftijden");
         if (opgeslagen) {
-          const parsed = JSON.parse(opgeslagen);
-          if (Array.isArray(parsed)) {
-            leeftijden = parsed;
-          } else if (typeof parsed === "string") {
-            leeftijden = parsed.split(",").map(x => x.trim());
-          }
+          leeftijden = JSON.parse(opgeslagen);
         }
       } catch {
         leeftijden = [];
@@ -141,11 +135,11 @@
         }
       } catch (error) {
         document.getElementById("foutmelding").textContent = "Verbindingsfout. Probeer opnieuw.";
-        console.error("Fetch fout:", error);
       }
     });
   </script>
 
 </body>
 </html>
+
 
