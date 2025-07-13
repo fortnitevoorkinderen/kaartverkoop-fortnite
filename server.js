@@ -9,22 +9,17 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ✅ Mollie API-key ophalen
 const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
-console.log("🔐 API KEY IS:", MOLLIE_API_KEY);
-
 if (!MOLLIE_API_KEY) {
-  throw new Error("❌ MOLLIE_API_KEY ontbreekt! Voeg deze toe in Render → Environment.");
+  throw new Error("❌ MOLLIE_API_KEY ontbreekt in .env of Render");
 }
-
 const mollie = mollieClient({ apiKey: MOLLIE_API_KEY });
 
-// ✅ CORS-instellingen
+// ✅ CORS
 const allowedOrigins = [
   'https://www.fortnitevoorkinderen.com',
   'http://localhost:3000'
 ];
-
 app.use(cors({
   origin: function (origin, callback) {
     if (!origin || allowedOrigins.includes(origin)) {
@@ -37,45 +32,36 @@ app.use(cors({
 
 // ✅ Middleware
 app.use(bodyParser.json());
-app.use('/webhook', express.urlencoded({ extended: true }));
-app.use(express.static('public')); // Zorgt dat je HTML en assets werken
+app.use(express.urlencoded({ extended: true }));
+app.use(express.static('public'));
 
-// ✅ STAP 1: Betaling starten
+// ✅ Betaling starten
 app.post('/start-payment', async (req, res) => {
   const { aantal, telefoon, email, leeftijden, postcode } = req.body;
-  const prijsPerKaartje = 10;
-  const totaalBedrag = (parseInt(aantal) * prijsPerKaartje).toFixed(2);
+  const totaal = (parseInt(aantal) * 10).toFixed(2);
   const factuurNummer = 'FG-' + Date.now();
 
   try {
     const payment = await mollie.payments.create({
       amount: {
         currency: 'EUR',
-        value: totaalBedrag
+        value: totaal
       },
-      description: `Real-Life Fortnite kaartje(s): ${aantal}x`,
+      description: `Fortnite kaartje(s): ${aantal}x`,
       redirectUrl: 'https://fortnitevoorkinderen.com/bedankt.html',
       webhookUrl: 'https://fortnitevoorkinderen.onrender.com/webhook',
-      metadata: {
-        aantal,
-        telefoon,
-        email,
-        leeftijden,
-        postcode,
-        factuurNummer
-      }
+      metadata: { aantal, telefoon, email, leeftijden, postcode, factuurNummer }
     });
 
     res.json({ url: payment.getCheckoutUrl() });
   } catch (err) {
-    console.error('❌ Fout bij betaling aanmaken:', err);
-    res.status(500).send('Fout bij betaling aanmaken');
+    console.error('❌ Mollie fout:', err.message);
+    res.status(500).send('Fout bij betaling starten');
   }
 });
 
-// ✅ STAP 2: Mollie Webhook
+// ✅ Webhook Mollie
 app.post('/webhook', async (req, res) => {
-  console.log('🔔 Webhook ontvangen van Mollie:', req.body);
   const paymentId = req.body.id;
 
   try {
@@ -83,7 +69,7 @@ app.post('/webhook', async (req, res) => {
 
     if (payment.status === 'paid') {
       const { aantal, telefoon, email, leeftijden, postcode, factuurNummer } = payment.metadata;
-      const totaalBedrag = (parseInt(aantal) * 10).toFixed(2);
+      const totaal = (parseInt(aantal) * 10).toFixed(2);
 
       const transporter = nodemailer.createTransport({
         service: 'gmail',
@@ -93,55 +79,46 @@ app.post('/webhook', async (req, res) => {
         }
       });
 
-      const mailToOrganizer = {
+      await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
-        subject: '📩 Nieuwe Kaartverkoop – Real-Life Fortnite',
-        text: `✅ Nieuwe bestelling ontvangen:
-
+        subject: '✅ Nieuwe Fortnite Aanmelding',
+        text: `
 Aantal kaartjes: ${aantal}
-Totaalbedrag: €${totaalBedrag}
+Totaalbedrag: €${totaal}
 Postcode: ${postcode}
 Leeftijden: ${leeftijden}
 Telefoon: ${telefoon}
-E-mailadres klant: ${email}
-Factuurnummer: ${factuurNummer}`
-      };
+E-mail: ${email}
+Factuurnummer: ${factuurNummer}
+        `
+      });
 
-      const mailToCustomer = {
+      await transporter.sendMail({
         from: process.env.EMAIL_USER,
         to: email,
-        subject: `🎟️ Bevestiging Real-Life Fortnite – Factuur ${factuurNummer}`,
+        subject: `🎫 Bevestiging Real-Life Fortnite – Factuur ${factuurNummer}`,
         html: `
-          <div style="font-family: Arial, sans-serif; max-width: 600px; margin: auto; padding: 20px; border: 1px solid #ccc;">
-            <h1 style="color: #333;">🎫 Bevestiging van je bestelling</h1>
-            <p>Bedankt voor je aanmelding voor het <strong>Real-Life Fortnite Event</strong>!</p>
-            <hr>
-            <h2 style="color: #555;">🧾 Factuurgegevens</h2>
-            <p><strong>Factuurnummer:</strong> ${factuurNummer}</p>
+          <div style="font-family:sans-serif; padding:20px;">
+            <h2>Bedankt voor je aanmelding!</h2>
             <p><strong>Aantal kaartjes:</strong> ${aantal}</p>
-            <p><strong>Totaalbedrag:</strong> €${totaalBedrag}</p>
-            <p><strong>Leeftijden kinderen:</strong> ${leeftijden}</p>
+            <p><strong>Totaal:</strong> €${totaal}</p>
+            <p><strong>Leeftijden:</strong> ${leeftijden}</p>
             <p><strong>Postcode:</strong> ${postcode}</p>
-            <p><strong>Telefoonnummer:</strong> ${telefoon}</p>
-            <p><strong>E-mailadres:</strong> ${email}</p>
+            <p><strong>Telefoon:</strong> ${telefoon}</p>
             <hr>
-            <p>We nemen binnenkort contact met je op over de exacte tijd en locatie van het evenement.</p>
-            <p style="color: #888;">Met vriendelijke groet,<br><strong>Team Fortnite Games</strong></p>
+            <p>We nemen contact met je op over tijd & locatie van het event.</p>
+            <p style="color:gray;">Factuurnummer: ${factuurNummer}</p>
           </div>
         `
-      };
+      });
 
-      await transporter.sendMail(mailToOrganizer);
-      await transporter.sendMail(mailToCustomer);
-      console.log('📧 Bevestigingsmails verzonden');
-    } else {
-      console.log(`ℹ️ Betaling niet voltooid. Status: ${payment.status}`);
+      console.log('📧 Mails verzonden');
     }
 
     res.status(200).end();
   } catch (err) {
-    console.error('❌ Fout bij webhookverwerking:', err);
+    console.error('❌ Webhook fout:', err.message);
     res.status(500).end();
   }
 });
@@ -150,6 +127,7 @@ Factuurnummer: ${factuurNummer}`
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op poort ${PORT}`);
 });
+
 
 
 
