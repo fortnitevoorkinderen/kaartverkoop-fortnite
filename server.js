@@ -11,6 +11,8 @@ const PORT = process.env.PORT || 10000;
 
 // ✅ Zet apiKey eerst apart
 const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
+console.log("🔐 API KEY IS:", MOLLIE_API_KEY); // 🔍 TEMP logging
+
 if (!MOLLIE_API_KEY) {
   throw new Error("❌ MOLLIE_API_KEY ontbreekt! Voeg deze toe in je Render Environment Variables.");
 }
