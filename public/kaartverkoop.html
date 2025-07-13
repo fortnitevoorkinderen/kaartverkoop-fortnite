@@ -101,9 +101,9 @@
 
   <script>
     document.getElementById("verzendBtn").addEventListener("click", async function () {
-      const aantal = document.getElementById("aantal").value;
-      const telefoon = document.getElementById("telefoon").value;
-      const email = document.getElementById("email").value;
+      const aantal = document.getElementById("aantal").value.trim();
+      const telefoon = document.getElementById("telefoon").value.trim();
+      const email = document.getElementById("email").value.trim();
       const postcode = localStorage.getItem("postcode");
 
       let leeftijden = [];
@@ -139,11 +139,13 @@
         } else {
           document.getElementById("foutmelding").textContent = "Er ging iets mis met de betaling.";
         }
-      } catch {
+      } catch (error) {
         document.getElementById("foutmelding").textContent = "Verbindingsfout. Probeer opnieuw.";
+        console.error("Fetch fout:", error);
       }
     });
   </script>
 
 </body>
 </html>
+
