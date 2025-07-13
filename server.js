@@ -38,6 +38,7 @@ app.use(cors({
 // ✅ Middleware
 app.use(bodyParser.json());
 app.use('/webhook', express.urlencoded({ extended: true }));
+app.use(express.static('public')); // Zorgt dat je HTML en assets werken
 
 // ✅ STAP 1: Betaling starten
 app.post('/start-payment', async (req, res) => {
@@ -144,9 +145,6 @@ Factuurnummer: ${factuurNummer}`
     res.status(500).end();
   }
 });
-
-// ✅ Static files helemaal onderaan!
-app.use(express.static('public'));
 
 // ✅ Start server
 app.listen(PORT, () => {
