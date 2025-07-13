@@ -9,12 +9,12 @@ const bodyParser = require('body-parser');
 const app = express();
 const PORT = process.env.PORT || 10000;
 
-// ✅ Zet apiKey eerst apart
+// ✅ Mollie API-key ophalen
 const MOLLIE_API_KEY = process.env.MOLLIE_API_KEY;
-console.log("🔐 API KEY IS:", MOLLIE_API_KEY); // 🔍 TEMP logging
+console.log("🔐 API KEY IS:", MOLLIE_API_KEY);
 
 if (!MOLLIE_API_KEY) {
-  throw new Error("❌ MOLLIE_API_KEY ontbreekt! Voeg deze toe in je Render Environment Variables.");
+  throw new Error("❌ MOLLIE_API_KEY ontbreekt! Voeg deze toe in Render → Environment.");
 }
 
 const mollie = mollieClient({ apiKey: MOLLIE_API_KEY });
@@ -35,11 +35,11 @@ app.use(cors({
   }
 }));
 
-app.use(express.static('public'));
+// ✅ Middleware
 app.use(bodyParser.json());
 app.use('/webhook', express.urlencoded({ extended: true }));
 
-// ✅ STAP 1: Betaling aanmaken
+// ✅ STAP 1: Betaling starten
 app.post('/start-payment', async (req, res) => {
   const { aantal, telefoon, email, leeftijden, postcode } = req.body;
   const prijsPerKaartje = 10;
@@ -53,7 +53,7 @@ app.post('/start-payment', async (req, res) => {
         value: totaalBedrag
       },
       description: `Real-Life Fortnite kaartje(s): ${aantal}x`,
-      redirectUrl: `https://fortnitevoorkinderen.com/bedankt.html`,
+      redirectUrl: 'https://fortnitevoorkinderen.com/bedankt.html',
       webhookUrl: 'https://fortnitevoorkinderen.onrender.com/webhook',
       metadata: {
         aantal,
@@ -67,14 +67,14 @@ app.post('/start-payment', async (req, res) => {
 
     res.json({ url: payment.getCheckoutUrl() });
   } catch (err) {
-    console.error('❌ Fout bij aanmaken betaling:', err);
-    res.status(500).send('Fout bij aanmaken betaling');
+    console.error('❌ Fout bij betaling aanmaken:', err);
+    res.status(500).send('Fout bij betaling aanmaken');
   }
 });
 
-// ✅ STAP 2: Webhook van Mollie
+// ✅ STAP 2: Mollie Webhook
 app.post('/webhook', async (req, res) => {
-  console.log('🔔 Webhook ontvangen:', req.body);
+  console.log('🔔 Webhook ontvangen van Mollie:', req.body);
   const paymentId = req.body.id;
 
   try {
@@ -95,8 +95,16 @@ app.post('/webhook', async (req, res) => {
       const mailToOrganizer = {
         from: process.env.EMAIL_USER,
         to: process.env.EMAIL_USER,
-        subject: 'Nieuwe Kaartverkoop – Real-Life Fortnite',
-        text: `Nieuwe aanmelding ontvangen:\n\nAantal kaartjes: ${aantal}\nTotaalbedrag: €${totaalBedrag}\nPostcode: ${postcode}\nLeeftijden: ${leeftijden}\nTelefoonnummer: ${telefoon}\nE-mailadres klant: ${email}\nFactuurnummer: ${factuurNummer}`
+        subject: '📩 Nieuwe Kaartverkoop – Real-Life Fortnite',
+        text: `✅ Nieuwe bestelling ontvangen:
+
+Aantal kaartjes: ${aantal}
+Totaalbedrag: €${totaalBedrag}
+Postcode: ${postcode}
+Leeftijden: ${leeftijden}
+Telefoon: ${telefoon}
+E-mailadres klant: ${email}
+Factuurnummer: ${factuurNummer}`
       };
 
       const mailToCustomer = {
@@ -127,17 +135,20 @@ app.post('/webhook', async (req, res) => {
       await transporter.sendMail(mailToCustomer);
       console.log('📧 Bevestigingsmails verzonden');
     } else {
-      console.log(`ℹ️ Betaling niet voltooid: status = ${payment.status}`);
+      console.log(`ℹ️ Betaling niet voltooid. Status: ${payment.status}`);
     }
 
     res.status(200).end();
   } catch (err) {
-    console.error('❌ Fout in webhook:', err);
+    console.error('❌ Fout bij webhookverwerking:', err);
     res.status(500).end();
   }
 });
 
-// ✅ Server starten
+// ✅ Static files helemaal onderaan!
+app.use(express.static('public'));
+
+// ✅ Start server
 app.listen(PORT, () => {
   console.log(`🚀 Server draait op poort ${PORT}`);
 });
